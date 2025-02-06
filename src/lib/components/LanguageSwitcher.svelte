@@ -5,6 +5,7 @@
     { code: 'en', name: 'English' },
     { code: 'de', name: 'Deutsch' },
     { code: 'hi', name: 'हिंदी' },
+    { code: 'ar', name: 'العربية' },
   ];
 
   function changeLocale(newLocale: string) {
@@ -22,8 +23,10 @@
       English
     {:else if $locale === 'de'}
       Deutsch
-    {:else}
+    {:else if $locale === 'hi'}
       हिंदी
+    {:else}
+      العربية
     {/if}
   </label>
   <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 mt-2">

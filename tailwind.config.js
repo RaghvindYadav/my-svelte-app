@@ -48,6 +48,7 @@ export default {
       },
     ],
     darkTheme: 'dark',
+    rtl: true,
     base: true,
     styled: true,
     utils: true,
