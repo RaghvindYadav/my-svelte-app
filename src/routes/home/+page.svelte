@@ -5,6 +5,7 @@
   import { query } from '$lib/apollo/hooks';
   import { FIND_CHANNELS_QUERY } from '$lib/apollo/operations';
   import NavBar from '$lib/components/NavBar.svelte';
+  import { t, locale } from 'svelte-i18n';
 
   let channels: any[] = [];
   let loading = true;
@@ -16,20 +17,20 @@
   }
 
   function getChannelTitle(channel: any) {
-    if (!channel?.participants) return 'Unknown';
+    if (!channel?.participants) return $t('unknown');
     if (channel.participants.length === 2) {
       const otherParticipant = channel.participants.find(
         (p: any) => p?.id !== $user?.userId
       );
       const metadata = otherParticipant?.metadata;
-      return metadata ? `${metadata.firstName} ${metadata.lastName}`.trim() : 'Unknown User';
+      return metadata ? `${metadata.firstName} ${metadata.lastName}`.trim() : $t('unknown_user');
     }
-    return channel.name || 'Group Chat';
+    return channel.name || $t('group_chat');
   }
 
   function formatDate(dateString: string) {
     try {
-      return new Date(dateString).toLocaleDateString();
+      return new Date(dateString).toLocaleDateString($locale || 'en');
     } catch {
       return '';
     }
@@ -42,13 +43,11 @@
       const data = await query(FIND_CHANNELS_QUERY, {
         userId: $user?.userId
       });
-      console.log('Channels data:', data); // Add this debug log
       channels = data?.findChannelsForUser?.filter(
         (channel: any) => !channel?.isArchivedForMe
       ) || [];
     } catch (err) {
-      console.error('Error loading channels:', err); // Add this debug log
-      error = err instanceof Error ? err.message : 'Failed to load channels';
+      error = err instanceof Error ? err.message : $t('failed_to_load_channels');
     } finally {
       loading = false;
     }
@@ -88,12 +87,12 @@
     </div>
   {:else}
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold text-base-content">Chats</h1>
+      <h1 class="text-2xl font-bold text-base-content">{$t('chats')}</h1>
       <a href="/find-users" class="btn btn-primary btn-sm">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
-        New Chat
+        {$t('new_chat')}
       </a>
     </div>
 
@@ -111,7 +110,7 @@
                 {#if participant?.metadata?.avatarUrl}
                   <img
                     src={participant.metadata.avatarUrl}
-                    alt="Avatar"
+                    alt={$t('avatar')}
                     class="w-full h-full object-cover rounded-full"
                   />
                 {:else}

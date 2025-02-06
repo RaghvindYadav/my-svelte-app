@@ -3,6 +3,7 @@
   import { goto } from '$app/navigation';
   import { user } from '$lib/stores/user';
   import { query, mutate } from '$lib/apollo/hooks';
+  import { t, locale } from 'svelte-i18n';
   import {
     FIND_CHANNEL_INVITATIONS_QUERY,
     ACCEPT_CHANNEL_INVITATION_MUTATION,
@@ -53,7 +54,7 @@
       });
       invitations = data.findChannelInvitationsForUser;
     } catch (err) {
-      error = err instanceof Error ? err.message : 'Failed to load invitations';
+      error = err instanceof Error ? err.message : $t('error_load_invitations');
     } finally {
       loading = false;
     }
@@ -68,7 +69,7 @@
       });
       await loadInvitations();
     } catch (err) {
-      error = err instanceof Error ? err.message : 'Failed to accept invitation';
+      error = err instanceof Error ? err.message : $t('error_accept_invitation');
     } finally {
       loading = false;
     }
@@ -84,14 +85,14 @@
       });
       await loadInvitations();
     } catch (err) {
-      error = err instanceof Error ? err.message : 'Failed to decline invitation';
+      error = err instanceof Error ? err.message : $t('error_decline_invitation');
     } finally {
       loading = false;
     }
   }
 
   function formatDate(dateString: string) {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString($locale || 'en', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -113,19 +114,19 @@
 
 <div class="container mx-auto px-4 py-8 max-w-3xl">
   <header class="mb-6">
-    <h1 class="text-2xl font-bold mb-4">Chat Invitations</h1>
+    <h1 class="text-2xl font-bold mb-4">{$t('chat_invitations')}</h1>
     <div class="tabs tabs-boxed">
       <button
         class="tab {selectedTab === 'received' ? 'tab-active' : ''}"
         on:click={() => selectedTab = 'received'}
       >
-        Received Invitations
+        {$t('received_invitations')}
       </button>
       <button
         class="tab {selectedTab === 'sent' ? 'tab-active' : ''}"
         on:click={() => selectedTab = 'sent'}
       >
-        Sent Invitations
+        {$t('sent_invitations')}
       </button>
     </div>
   </header>
@@ -145,7 +146,7 @@
     {:else if invitations.length === 0}
       <div class="alert alert-info">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        <span>No invitations found</span>
+        <span>{$t('no_invitations')}</span>
       </div>
     {:else}
       {#each invitations as invitation}
@@ -190,14 +191,14 @@
                     on:click={() => declineInvitation(invitation.id)}
                     disabled={loading}
                   >
-                    Decline
+                    {$t('decline')}
                   </button>
                   <button
                     class="btn btn-primary btn-sm"
                     on:click={() => acceptInvitation(invitation.id)}
                     disabled={loading}
                   >
-                    Accept
+                    {$t('accept')}
                   </button>
                 </div>
               {/if}

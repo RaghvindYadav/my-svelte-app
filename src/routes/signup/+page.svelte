@@ -5,6 +5,8 @@
   import { SIGN_UP_MUTATION } from '$lib/apollo/operations';
   import { user } from '$lib/stores/user';
   import ThemeToggle from '$lib/components/ThemeToggle.svelte';
+  import LanguageSwitcher from '$lib/components/LanguageSwitcher.svelte';
+  import { t } from 'svelte-i18n';
 
   let firstName = '';
   let lastName = '';
@@ -15,7 +17,6 @@
   let loading = false;
 
   onMount(() => {
-    // Check if user is already logged in
     if ($user) {
       goto('/home');
     }
@@ -53,15 +54,14 @@
 
 <div class="min-h-screen bg-base-200 flex items-center justify-center px-4">
   <div class="max-w-md w-full">
-    <!-- Theme toggle in the top-right corner -->
-    <div class="absolute top-4 right-4">
+    <div class="absolute top-4 right-4 flex gap-2">
+      <LanguageSwitcher />
       <ThemeToggle />
     </div>
 
-    <!-- Sign up card -->
     <div class="card bg-base-100 shadow-xl">
       <div class="card-body">
-        <h2 class="card-title text-2xl font-bold text-center mb-6">Sign Up</h2>
+        <h2 class="card-title text-2xl font-bold text-center mb-6">{$t('sign_up')}</h2>
 
         {#if error}
           <div class="alert alert-error mb-4">
@@ -72,14 +72,14 @@
         <form on:submit|preventDefault={handleSubmit} class="space-y-4">
           <div class="form-control">
             <label class="label" for="firstName">
-              <span class="label-text">First Name</span>
+              <span class="label-text">{$t('first_name')}</span>
             </label>
             <input
               type="text"
               id="firstName"
               bind:value={firstName}
               class="input input-bordered w-full"
-              placeholder="Enter your first name"
+              placeholder={$t('enter_first_name')}
               required
               disabled={loading}
             />
@@ -87,14 +87,14 @@
 
           <div class="form-control">
             <label class="label" for="lastName">
-              <span class="label-text">Last Name</span>
+              <span class="label-text">{$t('last_name')}</span>
             </label>
             <input
               type="text"
               id="lastName"
               bind:value={lastName}
               class="input input-bordered w-full"
-              placeholder="Enter your last name"
+              placeholder={$t('enter_last_name')}
               required
               disabled={loading}
             />
@@ -102,14 +102,14 @@
 
           <div class="form-control">
             <label class="label" for="email">
-              <span class="label-text">Email</span>
+              <span class="label-text">{$t('email')}</span>
             </label>
             <input
               type="email"
               id="email"
               bind:value={email}
               class="input input-bordered w-full"
-              placeholder="Enter your email"
+              placeholder={$t('enter_email')}
               required
               disabled={loading}
             />
@@ -117,14 +117,14 @@
 
           <div class="form-control">
             <label class="label" for="password">
-              <span class="label-text">Password</span>
+              <span class="label-text">{$t('password')}</span>
             </label>
             <input
               type="password"
               id="password"
               bind:value={password}
               class="input input-bordered w-full"
-              placeholder="Enter your password"
+              placeholder={$t('enter_password')}
               required
               disabled={loading}
             />
@@ -132,14 +132,14 @@
 
           <div class="form-control">
             <label class="label" for="confirmPassword">
-              <span class="label-text">Confirm Password</span>
+              <span class="label-text">{$t('confirm_password')}</span>
             </label>
             <input
               type="password"
               id="confirmPassword"
               bind:value={confirmPassword}
               class="input input-bordered w-full"
-              placeholder="Confirm your password"
+              placeholder={$t('confirm_your_password')}
               required
               disabled={loading}
             />
@@ -150,14 +150,14 @@
               {#if loading}
                 <span class="loading loading-spinner"></span>
               {/if}
-              {loading ? 'Signing up...' : 'Sign Up'}
+              {loading ? $t('signing_up') : $t('sign_up')}
             </button>
           </div>
 
           <div class="text-center mt-4">
-            Already have an account?
+            {$t('already_have_account')}
             <a href="/signin" class="link link-primary ml-1">
-              Sign in
+              {$t('sign_in')}
             </a>
           </div>
         </form>

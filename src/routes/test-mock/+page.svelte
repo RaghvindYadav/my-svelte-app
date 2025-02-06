@@ -3,7 +3,7 @@
   import { testMockData } from '$lib/test/mockDataTest';
   import NavBar from '$lib/components/NavBar.svelte';
   import { browser } from '$app/environment';
-  import { _ } from 'svelte-i18n'; // Import i18n for "Today" and "Yesterday" translations
+  import { _, t, locale } from 'svelte-i18n';
 
   interface Message {
     id: string;
@@ -137,7 +137,7 @@
   }
 
   function formatDate(dateString: string) {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString($locale || 'en', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -343,9 +343,9 @@
     <div class="card bg-base-100 shadow-lg mb-6">
       <div class="card-body">
         <div class="flex justify-between items-center">
-          <h2 class="card-title">Current User: {currentUserId}</h2>
+          <h2 class="card-title">{$t('current_user')}: {currentUserId}</h2>
           <button class="btn btn-primary" on:click={switchUser}>
-            Switch User
+            {$t('switch_user')}
           </button>
         </div>
       </div>
@@ -354,10 +354,10 @@
     <!-- Channel Info -->
     <div class="card bg-base-100 shadow-lg mb-6">
       <div class="card-body">
-        <h2 class="card-title">Channel Information</h2>
+        <h2 class="card-title">{$t('channel_information')}</h2>
         <div class="space-y-2">
-          <p><strong>Channel ID:</strong> {channel?.id}</p>
-          <p><strong>Created At:</strong> {channel?.createdAt ? formatDate(channel.createdAt) : 'N/A'}</p>
+          <p><strong>{$t('channel_id')}:</strong> {channel?.id}</p>
+          <p><strong>{$t('created_at')}:</strong> {channel?.createdAt ? formatDate(channel.createdAt) : $t('na')}</p>
         </div>
       </div>
     </div>
@@ -365,7 +365,7 @@
     <!-- Participants -->
     <div class="card bg-base-100 shadow-lg mb-6">
       <div class="card-body">
-        <h2 class="card-title">Participants</h2>
+        <h2 class="card-title">{$t('participants')}</h2>
         <div class="space-y-2">
           {#each participants as participant, i}
             <div class="badge badge-primary">{participant}</div>
@@ -377,7 +377,7 @@
     <!-- Messages -->
     <div class="card bg-base-100 shadow-lg mb-6">
       <div class="card-body flex flex-col h-[600px]"> <!-- Increased height and added flex -->
-        <h2 class="card-title">Messages</h2>
+        <h2 class="card-title">{$t('messages')}</h2>
 
         <!-- Messages container with flex-1 to take remaining space -->
         <div
@@ -388,7 +388,7 @@
           {#if loadingMore}
             <div class="flex flex-col items-center justify-center p-4 bg-base-200/50 rounded-lg">
               <span class="loading loading-spinner loading-md"></span>
-              <span class="text-sm text-base-content/70 mt-2">Loading older messages...</span>
+              <span class="text-sm text-base-content/70 mt-2">{$t('loading_older_messages')}</span>
             </div>
           {/if}
 
@@ -404,10 +404,16 @@
                 {@const repliedMessage = getReplyingToMessage(message.replyTo)}
                 {#if repliedMessage}
                   <div class="chat-header opacity-70 text-xs bg-base-200 rounded-lg px-2 py-1 mb-1 max-w-[80%]">
-                    <span class="font-semibold">Replying to:</span> {repliedMessage.messageText}
+                    {$t('replying_to')}: {repliedMessage.messageText.substring(0, 50)}...
                   </div>
                 {/if}
               {/if}
+              <div class="chat-header opacity-70">
+                {formatDate(message.createdAt)}
+                {#if message.editedAt}
+                  <span class="ml-1">({$t('edited')})</span>
+                {/if}
+              </div>
               {#if isSingleEmoji(message.messageText)}
               <!-- Single emoji without bubble -->
               <class class="flex items-end gap-2">
@@ -440,7 +446,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                           <path fill-rule="evenodd" d="M7.707 3.293a1 1 0 010 1.414L5.414 7H11a7 7 0 017 7v2a1 1 0 11-2 0v-2a5 5 0 00-5-5H5.414l2.293 2.293a1 1 0 11-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
                         </svg>
-                        Reply
+                        {$t('reply')}
                       </button>
 
                       {#if message.senderId === currentUserId}
@@ -454,7 +460,7 @@
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                           </svg>
-                          Edit
+                          {$t('edit')}
                         </button>
                       {/if}
                     </div>
@@ -475,6 +481,7 @@
                     type="text"
                     bind:value={editingText}
                     class="input input-bordered flex-1 bg-base-200 focus:outline-none focus:ring-2 focus:ring-primary/20 w-full text-base-content"
+                    placeholder={$t('edit_message')}
                     on:keydown={(e) => e.key === 'Enter' && saveEdit()}
                   />
                 {:else}
@@ -483,9 +490,8 @@
                     <button
                       class="see-more-btn {message.senderId === currentUserId ? 'text-primary-content' : 'text-neutral'} hover:opacity-80 text-sm ml-1 font-medium underline"
                       on:click|stopPropagation={() => toggleMessageExpansion(message.id)}
-                      aria-label="Show more"
                     >
-                      see more
+                      {$t('see_more')}
                     </button>
                   {:else}
                     {message.messageText}
@@ -493,9 +499,8 @@
                       <button
                         class="see-more-btn {message.senderId === currentUserId ? 'text-primary-content' : 'text-neutral'} hover:opacity-80 text-sm ml-1 font-medium underline"
                         on:click|stopPropagation={() => toggleMessageExpansion(message.id)}
-                        aria-label="Show less"
                       >
-                        see less
+                        {$t('see_less')}
                       </button>
                     {/if}
                   {/if}
@@ -530,7 +535,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                           <path fill-rule="evenodd" d="M7.707 3.293a1 1 0 010 1.414L5.414 7H11a7 7 0 017 7v2a1 1 0 11-2 0v-2a5 5 0 00-5-5H5.414l2.293 2.293a1 1 0 11-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
                         </svg>
-                        Reply
+                        {$t('reply')}
                       </button>
 
                       {#if message.senderId === currentUserId}
@@ -544,7 +549,7 @@
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                           </svg>
-                          Edit
+                          {$t('edit')}
                         </button>
                         <button
                           class="w-full text-left px-4 py-2 hover:bg-base-200 text-error rounded flex items-center gap-2"
@@ -556,7 +561,7 @@
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                           </svg>
-                          Delete
+                          {$t('delete')}
                         </button>
                       {/if}
 
@@ -572,7 +577,7 @@
                           <path d="M8 2a1 1 0 000 2h2a1 1 0 100-2H8z" />
                           <path d="M3 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v6h-4.586l1.293-1.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L10.414 13H15v3a2 2 0 01-2 2H5a2 2 0 01-2-2V5zM15 11h2a1 1 0 110 2h-2v-2z" />
                         </svg>
-                        Copy Text
+                        {$t('copy_text')}
                       </button>
 
                       <!-- Report Option -->
@@ -586,7 +591,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                           <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                         </svg>
-                        Report
+                        {$t('report')}
                       </button>
                     </div>
                   {/if}
@@ -608,18 +613,11 @@
 
         {#if showScrollButton}
           <button
-            class="btn btn-circle btn-primary absolute bottom-24 right-4 shadow-lg"
+            class="btn btn-circle btn-primary fixed bottom-24 right-8"
             on:click={scrollToBottom}
-            aria-label="Scroll to latest messages"
+            aria-label={$t('scroll_to_bottom')}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -634,8 +632,8 @@
         <div class="border-t border-base-200 pt-4 mt-auto">
           {#if replyingToId}
             <div class="alert alert-info mb-2">
-              <span>Replying to: {getReplyingToMessage(replyingToId)?.messageText.substring(0, 50)}...</span>
-              <button class="btn btn-xs btn-ghost" on:click={() => replyingToId = null}>Cancel</button>
+              <span>{$t('replying_to')}: {getReplyingToMessage(replyingToId)?.messageText.substring(0, 50)}...</span>
+              <button class="btn btn-xs btn-ghost" on:click={() => replyingToId = null}>{$t('cancel')}</button>
             </div>
           {/if}
           <form
@@ -645,7 +643,7 @@
             <textarea
               bind:value={newMessage}
               class="textarea textarea-bordered flex-1 bg-base-200 focus:outline-none focus:ring-2 focus:ring-primary/20 min-h-[2.5rem] max-h-[150px] resize-none"
-              placeholder="Type a message..."
+              placeholder={$t('type_message')}
               disabled={loading}
               rows="1"
               on:keydown={(e) => {
