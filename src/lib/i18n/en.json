@@ -1,0 +1,15 @@
+{
+  "messages": "Messages",
+  "type_message": "Type a message... (Shift+Enter for new line)",
+  "edited": "edited",
+  "see_more": "See more",
+  "copy": "Copy",
+  "reply": "Reply",
+  "edit": "Edit",
+  "delete": "Delete",
+  "report": "Report",
+  "helpful": "That was helpful!",
+  "thanks": "Thank you!",
+  "today": "Today",
+  "yesterday": "Yesterday"
+}
